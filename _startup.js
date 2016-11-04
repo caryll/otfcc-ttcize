@@ -5,6 +5,7 @@ var os = require("os");
 var command = process.execPath;
 var args = [
 	"--max-old-space-size=" + Math.floor(os.totalmem() / 1048576),
+	"--expose-gc",
 	require.resolve("./ttcize"),
 	...process.argv.slice(2)
 ];
