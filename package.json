@@ -1,6 +1,6 @@
 {
   "name": "otfcc-ttcize",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "main": "./ttcize.js",
   "license": "Apache 2.0",
   "dependencies": {
@@ -8,6 +8,6 @@
     "yargs": "^6.3.0"
   },
   "bin": {
-    "otfcc-ttcize": "./bin/_startup.js"
+    "otfcc-ttcize": "./bin/_startup"
   }
 }
