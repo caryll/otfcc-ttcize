@@ -1,7 +1,7 @@
 {
 	"name": "otfcc-ttcize",
-	"version": "0.1.0",
-	"main": "./ctq.js",
+	"version": "0.2.0",
+	"main": "./ttcize.js",
 	"license": "Apache 2.0",
 	"dependencies": {
 		"yargs": "^6.3.0"
