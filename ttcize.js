@@ -1,8 +1,9 @@
 const fs = require("fs");
-const argv = require("yargs").argv;
 const temp = require("temp");
 const child_process = require("child_process");
 const stringifyToStream = require("./stringify-to-stream");
+
+const argv = require("yargs").describe("h", "merge hints").boolean("h").argv;
 
 temp.track();
 
