@@ -3,7 +3,25 @@ const temp = require("temp");
 const child_process = require("child_process");
 const stringifyToStream = require("./stringify-to-stream");
 
-const argv = require("yargs").describe("h", "merge hints").boolean("h").argv;
+const argv = require("yargs").describe("h", "merge hints").boolean("h").boolean("k").argv;
+
+class GMAPEntry {
+	constructor(fwid, ix, n) {
+		this.fwid = fwid;
+		this.firstInstID = ix;
+		this.firstInstGID = n;
+		this.used = [ix];
+	}
+	compareTo(that) {
+		if (this.fwid === that.fwid) {
+			return this.firstInstID === that.firstInstID
+				? this.firstInstGID - that.firstInstGID
+				: this.firstInstID - that.firstInstID;
+		} else {
+			return this.fwid - that.fwid;
+		}
+	}
+}
 
 temp.track();
 
@@ -27,7 +45,8 @@ void (function() {
 		for (let gid in font.glyf) {
 			if (!glyf[gid]) {
 				glyf[gid] = font.glyf[gid];
-				gmap[gid] = { firstInstID: ix, firstInstGID: n, used: [ix] };
+				const fwid = n > 1 && glyf[gid].advanceWidth === font.head.unitsPerEm ? 1 : 0;
+				gmap[gid] = new GMAPEntry(fwid, ix, n);
 			} else {
 				font.glyf[gid] = glyf[gid];
 				gmap[gid].used.push(ix);
@@ -45,12 +64,7 @@ void (function() {
 		font.$ix = ix;
 		ix += 1;
 	}
-	let keys = Object.keys(gmap).sort(function(a, b) {
-		const p = gmap[a], q = gmap[b];
-		return p.firstInstID === q.firstInstID
-			? p.firstInstGID - q.firstInstGID
-			: p.firstInstID - q.firstInstID;
-	});
+	let keys = Object.keys(gmap).sort((a, b) => gmap[a].compareTo(gmap[b]));
 	process.stderr.write(`${keys.length} unique glyphs after merging.` + "\n");
 	if (argv.h) {
 		for (let g in glyf) {

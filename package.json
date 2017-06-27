@@ -5,7 +5,7 @@
   "license": "Apache 2.0",
   "dependencies": {
     "temp": "^0.8.3",
-    "yargs": "^8.0.0"
+    "yargs": "^8.0.2"
   },
   "bin": {
     "otfcc-ttcize": "./bin/_startup"
