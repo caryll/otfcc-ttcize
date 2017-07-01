@@ -87,8 +87,16 @@ void (function() {
 			}
 			f.cvt_[maxcvt] = f.$ix;
 		}
-		if (argv.h) {
+		if (argv.h && f.maxp) {
 			f.maxp.maxStackElements += 2;
+		}
+		if (argv.h && f.prep) {
+			f.prep.push(
+				"PUSHW_2",
+				maxcvt,
+				f.$ix, // push two words
+				"WCVTP" // write cvt entry
+			);
 		}
 	}
 
