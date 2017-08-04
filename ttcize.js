@@ -39,7 +39,7 @@ void (function() {
 		child_process.execSync(
 			`otfccdump ${f} -o ${p} --name-by-hash --glyph-name-prefix=${prefix}`
 		);
-		let font = JSON.parse(fs.readFileSync(p));
+		let font = JSON.parse(fs.readFileSync(p, "utf-8"));
 		fs.unlinkSync(p);
 		let n = 0;
 		for (let gid in font.glyf) {
@@ -134,7 +134,8 @@ function finalize(input) {
 	}
 
 	for (let j = 0; j < otds.length; j++) {
-		let pOTD = otds[j], pTTF = ttfs[j];
+		let pOTD = otds[j],
+			pTTF = ttfs[j];
 		child_process.execSync(`otfccbuild ${pOTD} -o ${pTTF} -O3 -k --keep-average-char-width`);
 		console.log(`Temp font ${j} successfully built.`);
 		fs.unlinkSync(pOTD);
