@@ -1,7 +1,8 @@
 const fs = require("fs");
 const temp = require("temp");
 const child_process = require("child_process");
-const stringifyToStream = require("./stringify-to-stream");
+
+const { Workflow, introduce, build, quadify, gc } = require("megaminx");
 
 const argv = require("yargs").describe("h", "merge hints").boolean("h").boolean("k").argv;
 
@@ -25,22 +26,20 @@ class GMAPEntry {
 
 temp.track();
 
-void (function() {
-	let fonts = [];
+const main = async function() {
+	const ctx = new Workflow({});
+
 	let glyf = {};
 	let gmap = {};
 	let ix = 0;
 	let maxcvt = 0;
+
 	for (let f of argv._) {
-		let p = temp.path();
-		let prefix = `s.`;
-		//let prefix = `s${fonts.length}.`;
-		console.log(`Reading font ${f}`);
-		child_process.execSync(
-			`otfccdump ${f} -o ${p} --name-by-hash --glyph-name-prefix=${prefix}`
-		);
-		let font = JSON.parse(fs.readFileSync(p, "utf-8"));
-		fs.unlinkSync(p);
+		process.stderr.write(`Reading font ${f}\n`);
+		const font = await ctx.run(introduce, "$" + ix, {
+			from: f,
+			nameByHash: true
+		});
 		let n = 0;
 		for (let gid in font.glyf) {
 			if (!glyf[gid]) {
@@ -54,10 +53,8 @@ void (function() {
 			n += 1;
 		}
 		font.glyf = glyf;
-		fonts.push(font);
-		if (global.gc) {
-			global.gc();
-		}
+		if (global.gc) global.gc();
+
 		if (argv.h && font.cvt_) {
 			maxcvt = Math.max(font.cvt_.length, maxcvt);
 		}
@@ -79,7 +76,8 @@ void (function() {
 			glyf[g].instructions = [...head, "IF", ...glyf[g].instructions, "EIF"];
 		}
 	}
-	for (let f of fonts) {
+	for (let fid in ctx.items) {
+		let f = ctx.items[fid];
 		f.glyph_order = keys;
 		if (argv.h && f.cvt_) {
 			while (f.cvt_.length < maxcvt) {
@@ -99,50 +97,22 @@ void (function() {
 			);
 		}
 	}
-
-	writeOTDs(fonts, finalize)();
-})();
-
-function writeOTDs(fonts, callback) {
-	let current = 0;
-	const total = fonts.length;
-	let otds = [];
-	let ttfs = [];
-	function step() {
-		if (current >= total) return callback({ otds, ttfs });
-		console.log(`Building temp font ${current}`);
-		let pOTD = temp.path();
+	let paths = [];
+	for (let fid in ctx.items) {
 		let pTTF = temp.path();
-		let outstream = fs.createWriteStream(pOTD, { encoding: "utf-8" });
-		stringifyToStream(fonts[current], outstream, false)(function() {
-			current += 1;
-			otds.push(pOTD);
-			ttfs.push(pTTF);
-			if (global.gc) {
-				global.gc();
-			}
-			setTimeout(step, 0);
+		paths.push(pTTF);
+		await ctx.run(build, fid, {
+			to: pTTF,
+			keepOrder: true,
+			sign: true
 		});
+		ctx.remove(fid);
+		if (global.gc) global.gc();
 	}
-	return step;
-}
-
-function finalize(input) {
-	const { otds, ttfs } = input;
-	if (global.gc) {
-		global.gc();
-	}
-
-	for (let j = 0; j < otds.length; j++) {
-		let pOTD = otds[j],
-			pTTF = ttfs[j];
-		child_process.execSync(`otfccbuild ${pOTD} -o ${pTTF} -O3 -k --keep-average-char-width`);
-		console.log(`Temp font ${j} successfully built.`);
-		fs.unlinkSync(pOTD);
-	}
-
-	child_process.execSync(`otf2otc ${ttfs.join(" ")} -o ${argv.o}`);
-	for (let p of ttfs) {
+	child_process.execSync(`otf2otc ${paths.join(" ")} -o ${argv.o}`);
+	for (let p of paths) {
 		fs.unlinkSync(p);
 	}
-}
+};
+
+main().catch(e => console.log(e));

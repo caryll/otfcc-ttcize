@@ -1,13 +1,14 @@
 {
-  "name": "otfcc-ttcize",
-  "version": "0.3.5",
-  "main": "./ttcize.js",
-  "license": "Apache 2.0",
-  "dependencies": {
-    "temp": "^0.8.3",
-    "yargs": "^8.0.2"
-  },
-  "bin": {
-    "otfcc-ttcize": "./bin/_startup"
-  }
+	"name": "otfcc-ttcize",
+	"version": "0.4.0",
+	"main": "./ttcize.js",
+	"license": "Apache 2.0",
+	"dependencies": {
+		"temp": "^0.8.3",
+		"yargs": "^8.0.2",
+		"megaminx": "^0.3.1"
+	},
+	"bin": {
+		"otfcc-ttcize": "./bin/_startup"
+	}
 }
