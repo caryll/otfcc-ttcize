@@ -105,7 +105,7 @@ async function buildOTD(ctx, tdir) {
 		const pOTD = temp.path({ dir: tdir, suffix: ".otd" });
 		await ctx.run(build, fid, { to: pOTD });
 		ctx.remove(fid);
-		process.stderr.write(`Built subfont #${otdPaths.length} as OTD.\n`);
+		process.stderr.write(`[TTCIZE] Built subfont #${otdPaths.length} as OTD.\n`);
 		if (global.gc) global.gc();
 		otdPaths.push(pOTD);
 	}
@@ -127,7 +127,7 @@ async function buildTTC(otdPaths, tdir) {
 			}
 		);
 		await fs.remove(pOTD);
-		process.stderr.write(`Built subfont #${paths.length} as OTF.\n`);
+		process.stderr.write(`[TTCIZE] Built subfont #${paths.length} as OTF.\n`);
 		paths.push(pOTF);
 	}
 
