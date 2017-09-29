@@ -106,7 +106,7 @@ async function buildOTD(ctx, tdir, prefix) {
 	let otdPaths = [];
 	for (let fid in ctx.items) {
 		const pOTD = prefix
-			? path.join(tdir, prefix + "." + otdPaths.length + ".otd")
+			? prefix + "." + otdPaths.length + ".otd"
 			: temp.path({ dir: tdir, suffix: ".otd" });
 		await ctx.run(build, fid, { to: pOTD });
 		ctx.remove(fid);
