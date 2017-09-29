@@ -6,7 +6,10 @@ const which = require("which");
 
 const { Workflow, introduce, build, quadify, gc } = require("megaminx");
 
-const argv = require("yargs").describe("h", "merge hints").boolean("h").boolean("k").argv;
+const argv = require("yargs")
+	.describe("h", "merge hints")
+	.boolean("h")
+	.boolean("k").argv;
 
 class GMAPEntry {
 	constructor(fwid, ix, n) {
@@ -99,10 +102,12 @@ async function collectGlyphs(ctx) {
 	return ctx;
 }
 
-async function buildOTD(ctx, tdir) {
+async function buildOTD(ctx, tdir, prefix) {
 	let otdPaths = [];
 	for (let fid in ctx.items) {
-		const pOTD = temp.path({ dir: tdir, suffix: ".otd" });
+		const pOTD = prefix
+			? path.join(tdir, prefix + "." + otdPaths.length + ".otd")
+			: temp.path({ dir: tdir, suffix: ".otd" });
 		await ctx.run(build, fid, { to: pOTD });
 		ctx.remove(fid);
 		process.stderr.write(`[TTCIZE] Built subfont #${otdPaths.length} as OTD.\n`);
@@ -137,15 +142,18 @@ async function buildTTC(otdPaths, tdir) {
 }
 
 async function main() {
-	if (!argv.o) throw new Error("Must specify an output.");
+	if (!argv.prefix && !argv.o) throw new Error("Must specify an output.");
 	if (!argv._.length) throw new Error("Must have at least one input.");
 
-	const tdir = path.dirname(argv.o);
+	const tdir = path.dirname(path.resolve(argv.prefix || argv.o));
 	await fs.ensureDir(tdir);
 
-	const otds = await buildOTD(await collectGlyphs(new Workflow({})), tdir);
-	if (global.gc) global.gc();
-	await buildTTC(otds, tdir);
+	const otds = await buildOTD(await collectGlyphs(new Workflow({})), tdir, argv.prefix);
+
+	if (argv.o) {
+		if (global.gc) global.gc();
+		await buildTTC(otds, tdir);
+	}
 }
 
 main().catch(e => console.error(e));
