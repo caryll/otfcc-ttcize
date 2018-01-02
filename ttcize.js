@@ -46,7 +46,13 @@ async function collectGlyphs(ctx) {
 		for (let gid in font.glyf) {
 			if (!glyf[gid]) {
 				glyf[gid] = font.glyf[gid];
-				const fwid = n > 1 && glyf[gid].advanceWidth === font.head.unitsPerEm ? 1 : 0;
+				const fwid =
+					argv.k &&
+					n > 1 &&
+					glyf[gid].advanceWidth === font.head.unitsPerEm &&
+					glyf[gid].advanceHeight === font.head.unitsPerEm
+						? 1
+						: 0;
 				gmap[gid] = new GMAPEntry(fwid, ix, n);
 			} else {
 				font.glyf[gid] = glyf[gid];
