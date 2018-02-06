@@ -12,22 +12,25 @@ const argv = require("yargs")
 	.boolean("k").argv;
 
 class GMAPEntry {
-	constructor(fwid, ix, n) {
-		this.fwid = fwid;
+	constructor(widthClass, ix, n) {
+		this.widthClass = widthClass;
 		this.firstInstID = ix;
 		this.firstInstGID = n;
 		this.used = [ix];
 	}
 	compareTo(that) {
-		if (this.fwid === that.fwid) {
+		if (this.widthClass === that.widthClass) {
 			return this.firstInstID === that.firstInstID
 				? this.firstInstGID - that.firstInstGID
 				: this.firstInstID - that.firstInstID;
 		} else {
-			return this.fwid - that.fwid;
+			return this.widthClass - that.widthClass;
 		}
 	}
 }
+
+const FULLWIDTH = 1;
+const COMPONENT = 2;
 
 // Pass 1 : collect glyphs in the input fonts
 async function collectGlyphs(ctx) {
@@ -46,14 +49,19 @@ async function collectGlyphs(ctx) {
 		for (let gid in font.glyf) {
 			if (!glyf[gid]) {
 				glyf[gid] = font.glyf[gid];
-				const fwid =
-					argv.k &&
-					n > 1 &&
-					glyf[gid].advanceWidth === font.head.unitsPerEm &&
-					glyf[gid].advanceHeight === font.head.unitsPerEm
-						? 1
-						: 0;
-				gmap[gid] = new GMAPEntry(fwid, ix, n);
+				let widthClass = 0;
+				if (argv.k && n > 1) {
+					if (
+						glyf[gid].advanceWidth === font.head.unitsPerEm &&
+						glyf[gid].advanceHeight === font.head.unitsPerEm
+					) {
+						widthClass = FULLWIDTH;
+					}
+					if (glyf[gid].advanceWidth === 0 && glyf[gid].advanceHeight === 0) {
+						widthClass = COMPONENT;
+					}
+				}
+				gmap[gid] = new GMAPEntry(widthClass, ix, n);
 			} else {
 				font.glyf[gid] = glyf[gid];
 				gmap[gid].used.push(ix);
