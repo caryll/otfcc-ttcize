@@ -57,9 +57,6 @@ async function collectGlyphs(ctx) {
 					) {
 						widthClass = FULLWIDTH;
 					}
-					if (glyf[gid].advanceWidth === 0 && glyf[gid].advanceHeight === 0) {
-						widthClass = COMPONENT;
-					}
 				}
 				gmap[gid] = new GMAPEntry(widthClass, ix, n);
 			} else {
