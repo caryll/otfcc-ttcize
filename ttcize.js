@@ -4,7 +4,9 @@ const temp = require("temp");
 const spawn = require("child-process-promise").spawn;
 const which = require("which");
 
-const { Workflow, introduce, build, quadify, gc } = require("megaminx");
+const { Workflow, introduce, build } = require("megaminx");
+
+const mergeTables = require("./merge-tables");
 
 const argv = require("yargs")
 	.describe("h", "merge hints")
@@ -40,7 +42,6 @@ async function collectGlyphs(ctx) {
 	let maxcvt = 0;
 
 	for (let f of argv._) {
-		process.stderr.write(`[TTCIZE] Reading font ${f}\n`);
 		const font = await ctx.run(introduce, "$" + ix, {
 			from: f,
 			nameByHash: true
@@ -75,7 +76,6 @@ async function collectGlyphs(ctx) {
 		ix += 1;
 	}
 	let keys = Object.keys(gmap).sort((a, b) => gmap[a].compareTo(gmap[b]));
-	process.stderr.write(`[TTCIZE] ${keys.length} unique glyphs after merging.` + "\n");
 	if (argv.h) {
 		for (let g in glyf) {
 			if (!glyf[g] || !gmap[g] || !glyf[g].instructions) continue;
@@ -121,7 +121,6 @@ async function buildOTD(ctx, tdir, prefix) {
 			: temp.path({ dir: tdir, suffix: ".otd" });
 		await ctx.run(build, fid, { to: pOTD });
 		ctx.remove(fid);
-		process.stderr.write(`[TTCIZE] Built subfont #${otdPaths.length} as OTD.\n`);
 		if (global.gc) global.gc();
 		otdPaths.push(pOTD);
 	}
@@ -143,12 +142,11 @@ async function buildTTC(otdPaths, tdir) {
 			}
 		);
 		await fs.remove(pOTD);
-		process.stderr.write(`[TTCIZE] Built subfont #${paths.length} as OTF.\n`);
 		paths.push(pOTF);
 	}
 
 	// build TTC
-	await spawn(which.sync("otf2otc"), ["-o", argv.o, ...paths], { stdio: "inherit" });
+	await mergeTables(paths, argv.o);
 	await Promise.all(paths.map(p => fs.remove(p)));
 }
 
