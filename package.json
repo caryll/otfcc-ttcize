@@ -1,7 +1,7 @@
 {
 	"name": "otfcc-ttcize",
-	"version": "0.8.0",
-	"main": "./ttcize.js",
+	"version": "0.9.0",
+	"main": "./lib/ttcize.js",
 	"license": "Apache 2.0",
 	"dependencies": {
 		"child-process-promise": "^2.2.1",
@@ -13,5 +13,9 @@
 	},
 	"bin": {
 		"otfcc-ttcize": "./bin/_startup"
+	},
+	"devDependencies": {
+		"prettier": "^1.18.2",
+		"eslint": "^6.5.1"
 	}
 }
