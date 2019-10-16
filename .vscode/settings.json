@@ -10,6 +10,7 @@
 		"megaminx",
 		"otfcc",
 		"otfccbuild",
+		"otfccdump",
 		"sfnt",
 		"subroutinize",
 		"ttcize"
