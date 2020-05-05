@@ -11,22 +11,13 @@
 			"experimentalObjectRestSpread": true
 		}
 	},
-	"extends": "eslint:recommended",
+	"extends": ["eslint:recommended", "prettier"],
 	"rules": {
-		"indent": ["error", "tab", { "SwitchCase": 1 }],
-		"linebreak-style": ["error", "windows"],
-		"quotes": ["error", "double", { "allowTemplateLiterals": true }],
 		"semi": ["error", "always"],
 		"no-var": "error",
 		"no-console": 0,
 		"no-constant-condition": ["error", { "checkLoops": false }],
-		"no-unused-vars": [
-			"warn",
-			{
-				"varsIgnorePattern": "^_",
-				"argsIgnorePattern": "^_",
-				"caughtErrorsIgnorePattern": "^_"
-			}
-		]
+		"no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
+		"no-unused-vars": ["off"]
 	}
 }
