@@ -1,6 +1,6 @@
 {
 	"name": "otfcc-ttcize",
-	"version": "0.10.0",
+	"version": "0.10.1",
 	"main": "./lib/ttcize.js",
 	"license": "Apache 2.0",
 	"engines": {
